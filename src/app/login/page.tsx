@@ -38,11 +38,13 @@ export default function LoginPage() {
     return (
         <div style={{
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             minHeight: 'calc(100vh - 120px)',
-            padding: '1rem',
-            position: 'relative'
+            padding: '2rem 1rem',
+            position: 'relative',
+            gap: '2rem'
         }}>
             <div style={{
                 position: 'fixed',
@@ -146,6 +148,21 @@ export default function LoginPage() {
                     </button>
                 </form>
             </div>
+
+            <p style={{
+                color: '#475569',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                background: 'rgba(255, 255, 255, 0.6)',
+                padding: '0.6rem 1.25rem',
+                borderRadius: '12px',
+                backdropFilter: 'blur(4px)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
+                margin: 0
+            }}>
+                ontwikkeld door <a href="mailto:steven.englicky@corneliusschool.be" style={{ color: 'var(--primary)', textDecoration: 'none', borderBottom: '2px solid var(--accent)' }}>meester Steven</a> voor Scholengroep Linco
+            </p>
         </div>
     );
 
