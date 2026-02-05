@@ -76,7 +76,7 @@ export default function ThemesPage() {
             </form>
 
             {/* List */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
+            <div className="admin-grid">
                 {loading ? (
                     <p>Laden...</p>
                 ) : themes.length === 0 ? (

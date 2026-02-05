@@ -71,7 +71,7 @@ export default function AdminSettingsPage() {
                         />
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div className="password-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                         <div>
                             <label className="label">Nieuw Wachtwoord</label>
                             <input
@@ -130,6 +130,13 @@ export default function AdminSettingsPage() {
                     </button>
                 </form>
             </div>
+            <style jsx>{`
+                @media (max-width: 640px) {
+                    .password-grid {
+                        grid-template-columns: 1fr !important;
+                    }
+                }
+            `}</style>
         </div>
     );
 }

@@ -74,9 +74,10 @@ export default function PlayerPage() {
         <div className="glass-panel" style={{ padding: '2rem', minHeight: 'calc(100vh - 8rem)', display: 'flex', flexDirection: 'column' }}>
 
             {/* Header / Breadcrumbs */}
-            <div style={{ marginBottom: '2.5rem' }}>
-                <h1 style={{ fontSize: '1.75rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--primary)' }}>
+            <div style={{ marginBottom: '2rem' }}>
+                <h1 className="breadcrumb-title" style={{ fontSize: '1.75rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--primary)', flexWrap: 'wrap' }}>
                     <span
+                        className="breadcrumb-item"
                         style={{ cursor: 'pointer', opacity: selectedClassId ? 0.5 : 1, transition: 'opacity 0.2s' }}
                         onClick={() => { setSelectedClassId(null); setSelectedThemeId(null); setCurrentSong(null); }}
                     >
@@ -86,6 +87,7 @@ export default function PlayerPage() {
                         <>
                             <span style={{ opacity: 0.3 }}>/</span>
                             <span
+                                className="breadcrumb-item"
                                 style={{ cursor: 'pointer', opacity: selectedThemeId ? 0.5 : 1, transition: 'opacity 0.2s' }}
                                 onClick={() => { setSelectedThemeId(null); setCurrentSong(null); }}
                             >
@@ -107,7 +109,7 @@ export default function PlayerPage() {
 
                 {/* Step 1: Class Selection */}
                 {!selectedClassId && (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '2rem' }}>
+                    <div className="admin-grid">
                         {classesData.map(cls => (
                             <div
                                 key={cls.id}
@@ -135,7 +137,7 @@ export default function PlayerPage() {
 
                 {/* Step 2: Theme Selection */}
                 {selectedClassId && !selectedThemeId && (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '2rem' }}>
+                    <div className="admin-grid">
                         {selectedClass?.themes.map(theme => (
                             <div
                                 key={theme.id}
@@ -169,7 +171,7 @@ export default function PlayerPage() {
 
                 {/* Step 3: Song Selection & Player */}
                 {selectedThemeId && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                    <div className="player-layout">
 
                         {/* Song List */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -221,14 +223,15 @@ export default function PlayerPage() {
                         }}>
                             {currentSong ? (
                                 <>
-                                    <div style={{
+                                    <div className="cover-art" style={{
                                         width: '240px', height: '240px', borderRadius: '28px',
                                         background: currentSong.coverUrl ? `url(${currentSong.coverUrl}) center/cover no-repeat` : 'linear-gradient(135deg, var(--primary), var(--secondary))',
                                         marginBottom: '2rem',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         fontSize: '5rem',
                                         boxShadow: '0 20px 40px rgba(0, 103, 56, 0.15)',
-                                        border: '6px solid white'
+                                        border: '6px solid white',
+                                        transition: 'all 0.3s'
                                     }}>
                                         {!currentSong.coverUrl && <span style={{ color: 'white' }}>♫</span>}
                                     </div>
@@ -340,6 +343,35 @@ export default function PlayerPage() {
           transform: translateY(-8px);
           border-color: var(--accent) !important;
           box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+        }
+        .player-layout {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 2rem;
+        }
+        @media (max-width: 900px) {
+          .player-layout {
+            grid-template-columns: 1fr;
+          }
+          .breadcrumb-title {
+            font-size: 1.4rem !important;
+          }
+          .cover-art {
+            width: 180px !important;
+            height: 180px !important;
+            font-size: 3rem !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .breadcrumb-title {
+            font-size: 1.1rem !important;
+          }
+          .breadcrumb-item {
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
         }
       `}</style>
         </div>

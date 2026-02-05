@@ -56,12 +56,21 @@ export default function LoginPage() {
                 backgroundRepeat: 'no-repeat',
                 zIndex: -1
             }} />
-            <div className="glass-panel" style={{
+            <div className="glass-panel login-card" style={{
                 width: '100%',
                 maxWidth: '420px',
                 padding: '3rem',
-                textAlign: 'center'
+                textAlign: 'center',
+                margin: '1rem'
             }}>
+                <style jsx>{`
+                    @media (max-width: 480px) {
+                        .login-card {
+                            padding: 2rem 1.5rem !important;
+                            max-width: 90% !important;
+                        }
+                    }
+                `}</style>
                 <div style={{
                     width: '120px',
                     height: '120px',

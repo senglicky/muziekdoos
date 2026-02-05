@@ -10,21 +10,20 @@ interface AdminHeaderProps {
 
 export default function AdminHeader({ title, subtitle, rightElement }: AdminHeaderProps) {
     return (
-        <div style={{
+        <div className="admin-header-container" style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'baseline',
             marginBottom: '2.5rem',
-            flexWrap: 'wrap',
-            gap: '1rem'
+            gap: '1rem',
+            flexWrap: 'wrap'
         }}>
             <div>
                 <h1 style={{
-                    fontSize: '2.25rem',
+                    fontSize: 'var(--header-font-size, 1.75rem)',
                     fontWeight: '800',
                     color: 'var(--primary)',
-                    letterSpacing: '-0.025em',
-                    marginBottom: subtitle ? '0.5rem' : '0'
+                    margin: 0
                 }}>
                     {title}
                 </h1>
@@ -43,6 +42,16 @@ export default function AdminHeader({ title, subtitle, rightElement }: AdminHead
                     {rightElement}
                 </div>
             )}
+            <style jsx>{`
+                @media (max-width: 640px) {
+                    .admin-header-container {
+                        margin-bottom: 1.5rem !important;
+                    }
+                    h1 {
+                        font-size: 1.5rem !important;
+                    }
+                }
+            `}</style>
         </div>
     );
 }

@@ -37,8 +37,8 @@ export default function TeacherDashboard() {
 
     return (
         <div className="glass-panel" style={{ padding: '2.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--primary)', margin: 0 }}>Mijn Liedjes</h1>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <h1 className="mobile-title" style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--primary)', margin: 0 }}>Mijn Liedjes</h1>
                 <Link href="/teacher/upload" className="btn btn-accent" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontWeight: '800' }}>
                     <span style={{ fontSize: '1.5rem' }}>+</span> Nieuw Liedje
                 </Link>
@@ -52,7 +52,7 @@ export default function TeacherDashboard() {
                     <Link href="/teacher/upload" className="btn btn-primary">Start je eerste upload</Link>
                 </div>
             ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.5rem' }}>
+                <div className="admin-grid">
                     {songs.map(song => (
                         <div key={song.id} style={{
                             background: 'white',
@@ -103,6 +103,11 @@ export default function TeacherDashboard() {
                     transform: translateY(-4px);
                     border-color: var(--accent);
                     box-shadow: 0 12px 20px -5px rgba(0,0,0,0.1);
+                }
+                @media (max-width: 640px) {
+                    .mobile-title {
+                        font-size: 1.5rem !important;
+                    }
                 }
             `}</style>
         </div>

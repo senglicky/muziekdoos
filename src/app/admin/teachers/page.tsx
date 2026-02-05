@@ -93,7 +93,7 @@ export default function TeachersPage() {
             />
 
             {/* Create Form */}
-            <form onSubmit={handleCreate} style={{
+            <form onSubmit={handleCreate} className="responsive-form" style={{
                 marginBottom: '3.5rem',
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
@@ -166,7 +166,7 @@ export default function TeachersPage() {
             </form>
 
             {/* List */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '1.5rem' }}>
+            <div className="admin-grid">
                 {loading ? (
                     <p>Laden...</p>
                 ) : teachers.length === 0 ? (
@@ -246,6 +246,12 @@ export default function TeachersPage() {
                     transform: translateY(-4px);
                     border-color: var(--accent);
                     box-shadow: 0 12px 20px -5px rgba(0,0,0,0.1);
+                }
+                @media (max-width: 640px) {
+                    .responsive-form {
+                        grid-template-columns: 1fr !important;
+                        padding: 1.25rem !important;
+                    }
                 }
             `}</style>
         </div>
