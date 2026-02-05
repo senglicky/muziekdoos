@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  username      String    @unique
+  passwordHash  String
+  role          Role      @default(TEACHER)
+  
+  // Relations
+  classes       Class[]
+  uploadedSongs Song[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Class {
+  id        String   @id @default(cuid())
+  name      String
+  
+  // Relations
+  teachers  User[]
+  songs     Song[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Theme {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  
+  // Relations
+  songs     Song[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Song {
+  id          String   @id @default(cuid())
+  title       String
+  url         String   // Supabase Storage URL or path
+  coverUrl    String?  // URL to extracted album art
+  
+  themeId     String
+  theme       Theme    @relation(fields: [themeId], references: [id])
+  
+  classId     String
+  class       Class    @relation(fields: [classId], references: [id])
+  
+  uploadedById String
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
