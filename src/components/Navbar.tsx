@@ -13,16 +13,16 @@ export default function Navbar() {
     const isAdmin = session.user.role === 'ADMIN';
 
     const menuItems = isAdmin ? [
-        { href: '/admin', label: 'Dashboard' },
         { href: '/admin/classes', label: 'Klassen' },
         { href: '/admin/teachers', label: 'Leerkrachten' },
         { href: '/admin/themes', label: "Thema's" },
         { href: '/admin/songs', label: 'Liedjes' },
         { href: '/admin/settings', label: 'Instellingen' },
+        { href: '/admin', label: 'Beheer' },
     ] : [
-        { href: '/teacher', label: 'Dashboard' },
         { href: '/teacher/player', label: 'Speler' },
         { href: '/teacher/upload', label: 'Uploaden' },
+        { href: '/teacher', label: 'Beheer' },
     ];
 
     return (

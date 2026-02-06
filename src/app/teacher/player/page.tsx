@@ -31,6 +31,7 @@ export default function PlayerPage() {
     const [isShuffle, setIsShuffle] = useState(false);
     const [shuffledQueue, setShuffledQueue] = useState<Song[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isPlayerCollapsed, setIsPlayerCollapsed] = useState(false);
 
     const toggleShuffle = () => {
         const newShuffleState = !isShuffle;
@@ -208,7 +209,7 @@ export default function PlayerPage() {
                             ))}
                         </div>
 
-                        {/* Active Player */}
+                        {/* Album Art & Title Area (Static) */}
                         <div style={{
                             background: '#f8fafc',
                             border: '1px solid #e2e8f0',
@@ -236,98 +237,7 @@ export default function PlayerPage() {
                                         {!currentSong.coverUrl && <span style={{ color: 'white' }}>♫</span>}
                                     </div>
                                     <h2 style={{ marginBottom: '0.25rem', fontSize: '1.75rem', fontWeight: '800', color: 'var(--primary)' }}>{currentSong.title}</h2>
-                                    <p style={{ color: '#64748b', marginBottom: '2.5rem', fontSize: '1.1rem', fontWeight: '500' }}>{selectedTheme?.name}</p>
-
-                                    <audio
-                                        controls
-                                        autoPlay
-                                        loop={isRepeating && !isAutoplay && !isShuffle}
-                                        src={currentSong.url}
-                                        style={{ width: '100%', outline: 'none' }}
-                                        onEnded={() => {
-                                            if (isRepeating && !isAutoplay && !isShuffle) return; // Native loop handles it
-
-                                            if (isShuffle && shuffledQueue.length > 0) {
-                                                const currentIndex = shuffledQueue.findIndex(s => s.id === currentSong.id);
-                                                if (currentIndex !== -1) {
-                                                    if (currentIndex < shuffledQueue.length - 1) {
-                                                        setCurrentSong(shuffledQueue[currentIndex + 1]);
-                                                    } else if (isAutoplay) {
-                                                        // Shuffle + Autoplay: Loop back to first song of shuffled queue
-                                                        setCurrentSong(shuffledQueue[0]);
-                                                    }
-                                                }
-                                            } else if (isAutoplay && selectedTheme) {
-                                                const currentIndex = selectedTheme.songs.findIndex(s => s.id === currentSong.id);
-                                                if (currentIndex !== -1) {
-                                                    if (currentIndex < selectedTheme.songs.length - 1) {
-                                                        setCurrentSong(selectedTheme.songs[currentIndex + 1]);
-                                                    } else if (isRepeating) {
-                                                        setCurrentSong(selectedTheme.songs[0]);
-                                                    }
-                                                }
-                                            }
-                                        }}
-                                    />
-
-                                    <div style={{ marginTop: '2.5rem', display: 'flex', gap: '1.25rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-                                        <button
-                                            onClick={() => setIsRepeating(!isRepeating)}
-                                            className="btn"
-                                            style={{
-                                                background: isRepeating ? 'var(--primary)' : 'white',
-                                                border: '2px solid var(--primary)',
-                                                color: isRepeating ? 'white' : 'var(--primary)',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '0.75rem',
-                                                padding: '0.75rem 1.5rem',
-                                                boxShadow: isRepeating ? '0 8px 16px rgba(0, 103, 56, 0.2)' : 'none',
-                                                fontSize: '1.1rem'
-                                            }}
-                                        >
-                                            <span style={{ fontSize: '1.4rem' }}>{isRepeating ? '🔁' : '🔄'}</span>
-                                            {isRepeating ? 'Herhalen AAN' : 'Herhalen UIT'}
-                                        </button>
-
-                                        <button
-                                            onClick={() => setIsAutoplay(!isAutoplay)}
-                                            className="btn"
-                                            style={{
-                                                background: isAutoplay ? 'var(--primary)' : 'white',
-                                                border: '2px solid var(--primary)',
-                                                color: isAutoplay ? 'white' : 'var(--primary)',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '0.75rem',
-                                                padding: '0.75rem 1.5rem',
-                                                boxShadow: isAutoplay ? '0 8px 16px rgba(0, 103, 56, 0.2)' : 'none',
-                                                fontSize: '1.1rem'
-                                            }}
-                                        >
-                                            <span style={{ fontSize: '1.4rem' }}>⏭️</span>
-                                            {isAutoplay ? 'Autoplay AAN' : 'Autoplay UIT'}
-                                        </button>
-
-                                        <button
-                                            onClick={toggleShuffle}
-                                            className="btn"
-                                            style={{
-                                                background: isShuffle ? 'var(--primary)' : 'white',
-                                                border: '2px solid var(--primary)',
-                                                color: isShuffle ? 'white' : 'var(--primary)',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '0.75rem',
-                                                padding: '0.75rem 1.5rem',
-                                                boxShadow: isShuffle ? '0 8px 16px rgba(0, 103, 56, 0.2)' : 'none',
-                                                fontSize: '1.1rem'
-                                            }}
-                                        >
-                                            <span style={{ fontSize: '1.4rem' }}>🔀</span>
-                                            {isShuffle ? 'Shuffle AAN' : 'Shuffle UIT'}
-                                        </button>
-                                    </div>
+                                    <p style={{ color: '#64748b', marginBottom: '1rem', fontSize: '1.1rem', fontWeight: '500' }}>{selectedTheme?.name}</p>
                                 </>
                             ) : (
                                 <p style={{ color: '#64748b', fontSize: '1.1rem', fontWeight: '500' }}>Selecteer een liedje om af te spelen</p>
@@ -337,6 +247,98 @@ export default function PlayerPage() {
                     </div>
                 )}
             </div>
+
+            {/* Floating Player Controls */}
+            {currentSong && (
+                <div className={`floating-player-bar ${isPlayerCollapsed ? 'collapsed' : ''}`}>
+                    <div className="player-bar-container">
+                        <button
+                            className="collapse-toggle"
+                            onClick={() => setIsPlayerCollapsed(!isPlayerCollapsed)}
+                            aria-label={isPlayerCollapsed ? "Toon speler" : "Verberg speler"}
+                        >
+                            {isPlayerCollapsed ? '▲' : '▼'}
+                        </button>
+
+                        {/* Audio Player (Always Rendered for Persistence) */}
+                        <div style={{ display: isPlayerCollapsed ? 'none' : 'block', width: '100%', maxWidth: '100%', marginBottom: isPlayerCollapsed ? 0 : '1rem' }}>
+                            <audio
+                                controls
+                                autoPlay
+                                loop={isRepeating && !isAutoplay && !isShuffle}
+                                src={currentSong.url}
+                                className="custom-audio-player"
+                                onEnded={() => {
+                                    if (isRepeating && !isAutoplay && !isShuffle) return;
+
+                                    if (isShuffle && shuffledQueue.length > 0) {
+                                        const currentIndex = shuffledQueue.findIndex(s => s.id === currentSong.id);
+                                        if (currentIndex !== -1) {
+                                            if (currentIndex < shuffledQueue.length - 1) {
+                                                setCurrentSong(shuffledQueue[currentIndex + 1]);
+                                            } else if (isAutoplay) {
+                                                setCurrentSong(shuffledQueue[0]);
+                                            }
+                                        }
+                                    } else if (isAutoplay && selectedTheme) {
+                                        const currentIndex = selectedTheme.songs.findIndex(s => s.id === currentSong.id);
+                                        if (currentIndex !== -1) {
+                                            if (currentIndex < selectedTheme.songs.length - 1) {
+                                                setCurrentSong(selectedTheme.songs[currentIndex + 1]);
+                                            } else if (isRepeating) {
+                                                setCurrentSong(selectedTheme.songs[0]);
+                                            }
+                                        }
+                                    }
+                                }}
+                            />
+                        </div>
+
+                        {!isPlayerCollapsed && (
+                            <div className="player-controls-content">
+                                <div className="mini-info">
+                                    <span className="mini-title">{currentSong.title}</span>
+                                    <span className="mini-theme">{selectedTheme?.name}</span>
+                                </div>
+                                <div style={{ height: '40px', width: '100%' }}></div>
+
+                                <div className="control-buttons">
+                                    <button
+                                        onClick={() => setIsRepeating(!isRepeating)}
+                                        className={`mini-btn ${isRepeating ? 'active' : ''}`}
+                                        title="Herhalen"
+                                    >
+                                        <span>{isRepeating ? '🔁' : '🔄'}</span>
+                                    </button>
+
+                                    <button
+                                        onClick={() => setIsAutoplay(!isAutoplay)}
+                                        className={`mini-btn ${isAutoplay ? 'active' : ''}`}
+                                        title="Autoplay"
+                                    >
+                                        <span>⏭️</span>
+                                    </button>
+
+                                    <button
+                                        onClick={toggleShuffle}
+                                        className={`mini-btn ${isShuffle ? 'active' : ''}`}
+                                        title="Shuffle"
+                                    >
+                                        <span>🔀</span>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {isPlayerCollapsed && (
+                            <div className="collapsed-content" onClick={() => setIsPlayerCollapsed(false)}>
+                                <span className="playing-indicator">🎵</span>
+                                <span className="now-playing-text">Aan het spelen: <strong>{currentSong.title}</strong></span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             <style jsx global>{`
         .hover-card:hover {
@@ -348,6 +350,150 @@ export default function PlayerPage() {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 2rem;
+          margin-bottom: 6rem; /* Space for the floating bar */
+        }
+        .floating-player-bar {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border-top: 1px solid rgba(0, 103, 56, 0.15);
+          box-shadow: 0 -10px 40px rgba(0, 103, 56, 0.12);
+          z-index: 1000;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          padding: 1rem 2rem;
+          height: auto;
+        }
+        .floating-player-bar.collapsed {
+          transform: translateY(calc(100% - 40px));
+          background: rgba(255, 255, 255, 0.95);
+          padding: 0 2rem;
+        }
+        .player-bar-container {
+          max-width: 1200px;
+          margin: 0 auto;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+        }
+        .collapse-toggle {
+          position: absolute;
+          top: -30px;
+          right: 20px;
+          background: var(--primary);
+          color: white;
+          border: none;
+          width: 40px;
+          height: 30px;
+          border-radius: 12px 12px 0 0;
+          cursor: pointer;
+          font-size: 0.8rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .player-controls-content {
+          display: grid;
+          grid-template-columns: 200px 1fr 200px;
+          align-items: center;
+          gap: 2rem;
+        }
+        @media (min-width: 901px) {
+            .player-controls-content {
+                 display: flex;
+                 justify-content: space-between;
+                 width: 100%;
+            }
+        }
+        .mini-info {
+          display: flex;
+          flex-direction: column;
+          gap: 0.2rem;
+        }
+        .mini-title {
+          font-weight: 800;
+          color: var(--primary);
+          font-size: 0.95rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .mini-theme {
+          font-size: 0.8rem;
+          color: #64748b;
+          font-weight: 600;
+        }
+        .custom-audio-player {
+          width: 100%;
+          height: 40px;
+          outline: none;
+        }
+        .control-buttons {
+          display: flex;
+          gap: 0.75rem;
+          justify-content: flex-end;
+        }
+        .mini-btn {
+          background: white;
+          border: 1.5px solid var(--primary);
+          color: var(--primary);
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-size: 1.1rem;
+        }
+        .mini-btn.active {
+          background: var(--primary);
+          color: white;
+          box-shadow: 0 4px 12px rgba(0, 103, 56, 0.2);
+        }
+        .mini-btn:hover {
+          transform: translateY(-2px);
+          background: rgba(0, 103, 56, 0.05);
+        }
+        .mini-btn.active:hover {
+          background: var(--primary);
+          opacity: 0.9;
+        }
+        .collapsed-content {
+          height: 40px;
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          cursor: pointer;
+        }
+        .playing-indicator {
+          animation: pulse 2s infinite;
+        }
+        .now-playing-text {
+          font-size: 0.85rem;
+          color: var(--primary);
+        }
+        @keyframes pulse {
+          0% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.2); opacity: 0.7; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        @media (max-width: 900px) {
+          .player-controls-content {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+          }
+          .mini-info, .control-buttons {
+            display: none;
+          }
+          .floating-player-bar {
+            padding: 1rem;
+          }
         }
         @media (max-width: 900px) {
           .player-layout {

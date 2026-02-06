@@ -13,7 +13,7 @@ export default async function AdminDashboard() {
     return (
         <div className="glass-panel" style={{ padding: '2.5rem' }}>
             <AdminHeader
-                title="Admin Dashboard"
+                title="Beheer"
                 subtitle={`Welkom terug, ${session.user.name}!`}
             />
 
