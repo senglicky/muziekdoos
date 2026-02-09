@@ -212,6 +212,8 @@ a {
   padding: 0.875rem 1rem;
   font-size: 1rem;
   font-weight: 500;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .login-error {
