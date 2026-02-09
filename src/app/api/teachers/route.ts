@@ -99,20 +99,29 @@ export async function PATCH(req: Request) {
     }
 
     const body = await req.json();
-    const { id, password } = body;
+    const { id, password, classIds } = body;
 
-    if (!id || !password) {
-        return new NextResponse("Missing id or password", { status: 400 });
+    if (!id) {
+        return new NextResponse("Missing id", { status: 400 });
     }
 
     try {
-        const passwordHash = await hash(password, 12);
+        const data: any = {};
+        if (password) {
+            data.passwordHash = await hash(password, 12);
+        }
+        if (classIds) {
+            data.classes = {
+                set: classIds.map((cid: string) => ({ id: cid }))
+            };
+        }
+
         await prisma.user.update({
             where: { id, role: "TEACHER" },
-            data: { passwordHash },
+            data,
         });
-        return new NextResponse("Password updated");
+        return new NextResponse("Teacher updated");
     } catch (error) {
-        return new NextResponse("Error updating password", { status: 500 });
+        return new NextResponse("Error updating teacher", { status: 500 });
     }
 }

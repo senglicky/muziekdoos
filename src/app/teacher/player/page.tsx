@@ -498,10 +498,28 @@ export default function PlayerPage() {
           .player-controls-content {
             grid-template-columns: 1fr;
             gap: 1rem;
+            justify-items: center; /* Center items horizontally */
           }
-          .mini-info, .control-buttons {
-            display: none;
+          /* Removed display: none for .mini-info and .control-buttons */
+          
+          .mini-info {
+             align-items: center;
+             text-align: center;
+             width: 100%;
+             overflow: hidden;
           }
+          
+          /* Hide the spacer div on mobile only */
+          .player-controls-content > div:nth-child(2) {
+             display: none;
+          }
+
+          .control-buttons {
+             justify-content: center;
+             width: 100%;
+             margin-top: 0.5rem;
+          }
+
           .floating-player-bar {
             padding: 1rem;
           }

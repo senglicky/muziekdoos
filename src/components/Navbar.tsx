@@ -3,12 +3,15 @@
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
     const { data: session } = useSession();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    if (!session) return null;
+    const pathname = usePathname();
+
+    if (!session || pathname === '/login') return null;
 
     const isAdmin = session.user.role === 'ADMIN';
 
@@ -19,7 +22,6 @@ export default function Navbar() {
         { href: '/admin/themes', label: "Thema's" },
         { href: '/admin/songs', label: 'Liedjes' },
         { href: '/admin/settings', label: 'Instellingen' },
-        { href: '/admin', label: 'Beheer' },
     ] : [
         { href: '/teacher/player', label: 'Speler' },
         { href: '/teacher/upload', label: 'Uploaden' },
@@ -42,7 +44,7 @@ export default function Navbar() {
                 justifyContent: 'space-between',
                 alignItems: 'center'
             }}>
-                <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <Link href="/teacher/player" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <div style={{
                         width: '40px',
                         height: '40px',
@@ -66,7 +68,7 @@ export default function Navbar() {
                         WebkitTextFillColor: 'transparent',
                         filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
                     }}>
-                        Korneel & Clementine
+                        Korneel & Clementine's Muziekdoos
                     </span>
                 </Link>
 

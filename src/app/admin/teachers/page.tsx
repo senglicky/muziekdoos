@@ -1,3 +1,5 @@
+
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -19,12 +21,17 @@ export default function TeachersPage() {
         name: '',
         username: '',
         password: '',
-        classId: '' // Simplified for now: one initial class
+        classIds: [] as string[]
     });
 
+    const [editingTeacher, setEditingTeacher] = useState<{ id: string, name: string, classIds: string[] } | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        loadData();
+    }, []);
+
+    const loadData = () => {
         Promise.all([
             fetch('/api/teachers').then(res => res.json()),
             fetch('/api/classes').then(res => res.json())
@@ -33,7 +40,7 @@ export default function TeachersPage() {
             setClasses(classesData);
             setLoading(false);
         });
-    }, []);
+    };
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -46,21 +53,22 @@ export default function TeachersPage() {
                 name: formData.name,
                 username: formData.username,
                 password: formData.password,
-                classIds: formData.classId ? [formData.classId] : []
+                classIds: formData.classIds
             }),
         });
 
         if (res.ok) {
-            setFormData({ name: '', username: '', password: '', classId: '' });
-            // Refresh list
-            const teachersData = await fetch('/api/teachers').then(d => d.json());
-            setTeachers(teachersData);
+            setFormData({ name: '', username: '', password: '', classIds: [] });
+            loadData();
         } else {
             alert("Er ging iets mis. Mogelijk bestaat de gebruikersnaam al.");
         }
     };
 
-    const handleResetPassword = async (id: string, newPass: string) => {
+    const handleResetPassword = async (id: string, name: string) => {
+        const newPass = prompt(`Nieuw wachtwoord voor ${name}:`);
+        if (!newPass) return;
+
         const res = await fetch('/api/teachers', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
@@ -74,6 +82,24 @@ export default function TeachersPage() {
         }
     };
 
+    const handleUpdateClasses = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingTeacher) return;
+
+        const res = await fetch('/api/teachers', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: editingTeacher.id, classIds: editingTeacher.classIds })
+        });
+
+        if (res.ok) {
+            setEditingTeacher(null);
+            loadData();
+        } else {
+            alert("Fout bij bijwerken van klassen.");
+        }
+    };
+
     const handleDelete = async (id: string) => {
         if (!confirm("Weet je zeker dat je deze leerkracht wilt verwijderen?")) return;
 
@@ -82,6 +108,14 @@ export default function TeachersPage() {
             setTeachers(teachers.filter(t => t.id !== id));
         } else {
             alert("Kon leerkracht niet verwijderen.");
+        }
+    };
+
+    const toggleClassSelection = (id: string, currentIds: string[], setter: (ids: string[]) => void) => {
+        if (currentIds.includes(id)) {
+            setter(currentIds.filter(c => c !== id));
+        } else {
+            setter([...currentIds, id]);
         }
     };
 
@@ -120,18 +154,15 @@ export default function TeachersPage() {
                 </div>
 
                 <div>
-                    <label className="label">Koppelen aan klas</label>
-                    <select
+                    <label className="label">Wachtwoord</label>
+                    <input
+                        type="password"
                         className="input-field"
-                        value={formData.classId}
-                        onChange={(e) => setFormData({ ...formData, classId: e.target.value })}
-                        style={{ appearance: 'auto' }}
-                    >
-                        <option value="">Geen klas</option>
-                        {classes.map(c => (
-                            <option key={c.id} value={c.id}>{c.name}</option>
-                        ))}
-                    </select>
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        placeholder="••••••"
+                        required
+                    />
                 </div>
 
                 <div>
@@ -147,15 +178,24 @@ export default function TeachersPage() {
                 </div>
 
                 <div>
-                    <label className="label">Wachtwoord</label>
-                    <input
-                        type="password"
-                        className="input-field"
-                        value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        placeholder="••••••"
-                        required
-                    />
+                    <label className="label">Koppelen aan klassen</label>
+                    <div style={{
+                        display: 'flex', flexDirection: 'column', gap: '0.5rem',
+                        maxHeight: '150px', overflowY: 'auto',
+                        border: '1px solid #e2e8f0', borderRadius: '12px', padding: '0.75rem', background: 'white'
+                    }}>
+                        {classes.map(c => (
+                            <label key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', cursor: 'pointer' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={formData.classIds.includes(c.id)}
+                                    onChange={() => toggleClassSelection(c.id, formData.classIds, (ids) => setFormData({ ...formData, classIds: ids }))}
+                                    style={{ accentColor: 'var(--primary)', width: '16px', height: '16px' }}
+                                />
+                                {c.name}
+                            </label>
+                        ))}
+                    </div>
                 </div>
 
                 <div style={{ gridColumn: '1 / -1', marginTop: '1rem' }}>
@@ -205,23 +245,35 @@ export default function TeachersPage() {
                                     )}
                                 </div>
                             </div>
-                            <div style={{ display: 'flex', gap: '0.75rem', marginTop: 'auto' }}>
+                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto', flexWrap: 'wrap' }}>
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        const newPass = prompt(`Nieuw wachtwoord voor ${t.name}:`);
-                                        if (newPass) handleResetPassword(t.id, newPass);
+                                    onClick={() => setEditingTeacher({ id: t.id, name: t.name, classIds: t.classes.map(c => c.id) })}
+                                    className="btn"
+                                    style={{
+                                        flex: 1,
+                                        background: 'white',
+                                        color: 'var(--primary)',
+                                        border: '1px solid var(--primary)',
+                                        padding: '0.5rem',
+                                        fontSize: '0.8rem'
                                     }}
+                                >
+                                    Klassen
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handleResetPassword(t.id, t.name)}
                                     className="btn"
                                     style={{
                                         flex: 1,
                                         background: 'rgba(56, 189, 248, 0.1)',
                                         color: '#0284c7',
-                                        padding: '0.5rem 1rem',
-                                        fontSize: '0.85rem'
+                                        padding: '0.5rem',
+                                        fontSize: '0.8rem'
                                     }}
                                 >
-                                    Reset Wachtwoord
+                                    Wachtwoord
                                 </button>
                                 <button
                                     type="button"
@@ -230,8 +282,8 @@ export default function TeachersPage() {
                                     style={{
                                         background: '#fef2f2',
                                         color: '#ef4444',
-                                        padding: '0.5rem 1rem',
-                                        fontSize: '0.85rem'
+                                        padding: '0.5rem',
+                                        fontSize: '0.8rem'
                                     }}
                                 >
                                     Verwijderen
@@ -241,6 +293,54 @@ export default function TeachersPage() {
                     ))
                 )}
             </div>
+
+            {/* Edit Modal */}
+            {editingTeacher && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    zIndex: 1000, padding: '1rem'
+                }}>
+                    <form onSubmit={handleUpdateClasses} className="glass-panel" style={{ padding: '2.5rem', width: '100%', maxWidth: '420px', background: 'white' }}>
+                        <h2 style={{ marginBottom: '0.5rem', fontWeight: '800', color: 'var(--primary)' }}>Klassen Bewerken</h2>
+                        <p style={{ marginBottom: '1.5rem', color: '#64748b' }}>Voor {editingTeacher.name}</p>
+
+                        <div style={{ marginBottom: '2rem' }}>
+                            <div style={{
+                                display: 'flex', flexDirection: 'column', gap: '0.5rem',
+                                maxHeight: '250px', overflowY: 'auto',
+                                border: '1px solid #e2e8f0', borderRadius: '12px', padding: '0.75rem'
+                            }}>
+                                {classes.map(c => (
+                                    <label key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1rem', cursor: 'pointer', padding: '0.25rem' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={editingTeacher.classIds.includes(c.id)}
+                                            onChange={() => toggleClassSelection(c.id, editingTeacher.classIds, (ids) => setEditingTeacher({ ...editingTeacher, classIds: ids }))}
+                                            style={{ accentColor: 'var(--primary)', width: '18px', height: '18px' }}
+                                        />
+                                        {c.name}
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Opslaan</button>
+                            <button
+                                type="button"
+                                onClick={() => setEditingTeacher(null)}
+                                className="btn"
+                                style={{ flex: 1, background: '#f1f5f9', color: '#475569' }}
+                            >
+                                Annuleren
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+
             <style jsx>{`
                 .teacher-card:hover {
                     transform: translateY(-4px);
