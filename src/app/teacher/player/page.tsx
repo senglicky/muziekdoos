@@ -57,11 +57,22 @@ export default function PlayerPage() {
         // Actually, I'll fetch /api/songs?myUploads=true is NOT enough, we need ALL songs for the teacher's classes.
         // Let's create `fetchData` that calls a new endpoint /api/player/data
         fetch('/api/player/data')
-            .then(res => res.json())
+            .then(async res => {
+                if (!res.ok) {
+                    const text = await res.text();
+                    console.error("Player data fetch failed:", res.status, text);
+                    throw new Error(`Failed to fetch player data: ${res.status}`);
+                }
+                return res.json();
+            })
             .then(data => {
                 setClassesData(data);
                 // If only one class, auto-select
                 if (data.length === 1) setSelectedClassId(data[0].id);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error("Error loading player data:", err);
                 setLoading(false);
             });
     }, []);

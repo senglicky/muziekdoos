@@ -11,7 +11,7 @@ export default function UploadPage() {
     const [file, setFile] = useState<File | null>(null);
     const [title, setTitle] = useState('');
     const [themeId, setThemeId] = useState('');
-    const [classId, setClassId] = useState('');
+    const [classIds, setClassIds] = useState<string[]>([]);
 
     const [themes, setThemes] = useState<SelectItem[]>([]);
     const [classes, setClasses] = useState<SelectItem[]>([]);
@@ -39,8 +39,8 @@ export default function UploadPage() {
 
     const handleUpload = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!file || !title || !themeId || !classId) {
-            setMessage("Vul alle velden in en kies een bestand.");
+        if (!file || !title || !themeId || classIds.length === 0) {
+            setMessage("Vul alle velden in, kies minimaal één klas en een bestand.");
             return;
         }
 
@@ -98,7 +98,7 @@ export default function UploadPage() {
                     url: songUrl,
                     coverUrl,
                     themeId,
-                    classId
+                    classIds
                 }),
             });
 
@@ -164,19 +164,27 @@ export default function UploadPage() {
                     </div>
 
                     <div>
-                        <label className="label">Klas</label>
-                        <select
-                            className="input-field"
-                            value={classId}
-                            onChange={(e) => setClassId(e.target.value)}
-                            required
-                            style={{ appearance: 'auto' }}
-                        >
-                            <option value="">Kies klas...</option>
+                        <label className="label">Klassen</label>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '150px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '0.75rem' }}>
                             {classes.map(c => (
-                                <option key={c.id} value={c.id}>{c.name}</option>
+                                <label key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', cursor: 'pointer' }}>
+                                    <input
+                                        type="checkbox"
+                                        value={c.id}
+                                        checked={classIds.includes(c.id)}
+                                        onChange={(e) => {
+                                            if (e.target.checked) {
+                                                setClassIds([...classIds, c.id]);
+                                            } else {
+                                                setClassIds(classIds.filter(id => id !== c.id));
+                                            }
+                                        }}
+                                        style={{ accentColor: 'var(--primary)', width: '18px', height: '18px' }}
+                                    />
+                                    {c.name}
+                                </label>
                             ))}
-                        </select>
+                        </div>
                     </div>
                 </div>
 

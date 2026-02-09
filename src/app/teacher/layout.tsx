@@ -10,7 +10,7 @@ export default async function TeacherLayout({
 }) {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== "TEACHER") {
+    if (!session || (session.user.role !== "TEACHER" && session.user.role !== "ADMIN")) {
         redirect("/login");
     }
 

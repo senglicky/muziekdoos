@@ -7,7 +7,7 @@ type Song = {
     id: string;
     title: string;
     theme: { name: string };
-    class: { name: string };
+    classes: { name: string, id: string }[];
     createdAt: string;
 };
 
@@ -71,9 +71,11 @@ export default function TeacherDashboard() {
                                     <span style={{ padding: '0.35rem 0.75rem', background: 'rgba(0, 103, 56, 0.05)', color: 'var(--primary)', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '600' }}>
                                         📚 {song.theme.name}
                                     </span>
-                                    <span style={{ padding: '0.35rem 0.75rem', background: 'rgba(34, 139, 109, 0.05)', color: 'var(--secondary)', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '600' }}>
-                                        🏫 {song.class.name}
-                                    </span>
+                                    {song.classes && song.classes.map(c => (
+                                        <span key={c.id} style={{ padding: '0.35rem 0.75rem', background: 'rgba(34, 139, 109, 0.05)', color: 'var(--secondary)', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '600' }}>
+                                            🏫 {c.name}
+                                        </span>
+                                    ))}
                                 </div>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid #f1f5f9' }}>

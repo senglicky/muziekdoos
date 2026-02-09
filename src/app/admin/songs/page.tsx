@@ -9,7 +9,7 @@ type Song = {
     id: string;
     title: string;
     theme: Theme;
-    class: Class;
+    classes: Class[];
     url: string;
 };
 
@@ -19,7 +19,7 @@ export default function AdminSongsPage() {
     const [classes, setClasses] = useState<Class[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const [editingSong, setEditingSong] = useState<Song | null>(null);
+    const [editingSong, setEditingSong] = useState<{ id: string, title: string, themeId: string, classIds: string[] } | null>(null);
 
     useEffect(() => {
         loadData();
@@ -64,8 +64,8 @@ export default function AdminSongsPage() {
             body: JSON.stringify({
                 id: editingSong.id,
                 title: editingSong.title,
-                themeId: editingSong.theme.id,
-                classId: editingSong.class.id
+                themeId: editingSong.themeId,
+                classIds: editingSong.classIds
             }),
         });
 
@@ -98,7 +98,7 @@ export default function AdminSongsPage() {
                             <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
                                 <th style={{ padding: '1.25rem', fontWeight: '700', color: '#475569' }}>Titel</th>
                                 <th style={{ padding: '1.25rem', fontWeight: '700', color: '#475569' }}>Thema</th>
-                                <th style={{ padding: '1.25rem', fontWeight: '700', color: '#475569' }}>Klas</th>
+                                <th style={{ padding: '1.25rem', fontWeight: '700', color: '#475569' }}>Klassen</th>
                                 <th style={{ padding: '1.25rem', fontWeight: '700', color: '#475569' }}>Acties</th>
                             </tr>
                         </thead>
@@ -112,13 +112,22 @@ export default function AdminSongsPage() {
                                         </span>
                                     </td>
                                     <td style={{ padding: '1.25rem' }}>
-                                        <span style={{ padding: '0.4rem 0.8rem', background: 'rgba(34, 139, 109, 0.05)', color: 'var(--secondary)', borderRadius: '20px', fontSize: '0.85rem', fontWeight: '600' }}>
-                                            {song.class.name}
-                                        </span>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                            {song.classes && song.classes.map(c => (
+                                                <span key={c.id} style={{ padding: '0.4rem 0.8rem', background: 'rgba(34, 139, 109, 0.05)', color: 'var(--secondary)', borderRadius: '20px', fontSize: '0.85rem', fontWeight: '600' }}>
+                                                    {c.name}
+                                                </span>
+                                            ))}
+                                        </div>
                                     </td>
                                     <td style={{ padding: '1.25rem', display: 'flex', gap: '0.75rem' }}>
                                         <button
-                                            onClick={() => setEditingSong(song)}
+                                            onClick={() => setEditingSong({
+                                                id: song.id,
+                                                title: song.title,
+                                                themeId: song.theme.id,
+                                                classIds: song.classes.map(c => c.id)
+                                            })}
                                             className="btn"
                                             style={{
                                                 background: 'white',
@@ -175,8 +184,8 @@ export default function AdminSongsPage() {
                             <label className="label">Thema</label>
                             <select
                                 className="input-field"
-                                value={editingSong.theme.id}
-                                onChange={e => setEditingSong({ ...editingSong, theme: { ...editingSong.theme, id: e.target.value } })}
+                                value={editingSong.themeId}
+                                onChange={e => setEditingSong({ ...editingSong, themeId: e.target.value })}
                                 style={{ appearance: 'auto' }}
                             >
                                 {themes.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
@@ -184,15 +193,27 @@ export default function AdminSongsPage() {
                         </div>
 
                         <div style={{ marginBottom: '1.25rem' }}>
-                            <label className="label">Klas</label>
-                            <select
-                                className="input-field"
-                                value={editingSong.class.id}
-                                onChange={e => setEditingSong({ ...editingSong, class: { ...editingSong.class, id: e.target.value } })}
-                                style={{ appearance: 'auto' }}
-                            >
-                                {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                            </select>
+                            <label className="label">Klassen</label>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '150px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '0.75rem' }}>
+                                {classes.map(c => (
+                                    <label key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', cursor: 'pointer' }}>
+                                        <input
+                                            type="checkbox"
+                                            value={c.id}
+                                            checked={editingSong.classIds.includes(c.id)}
+                                            onChange={(e) => {
+                                                if (e.target.checked) {
+                                                    setEditingSong({ ...editingSong, classIds: [...editingSong.classIds, c.id] });
+                                                } else {
+                                                    setEditingSong({ ...editingSong, classIds: editingSong.classIds.filter(id => id !== c.id) });
+                                                }
+                                            }}
+                                            style={{ accentColor: 'var(--primary)', width: '18px', height: '18px' }}
+                                        />
+                                        {c.name}
+                                    </label>
+                                ))}
+                            </div>
                         </div>
 
                         <div style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem' }}>

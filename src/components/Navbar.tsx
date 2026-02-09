@@ -13,6 +13,7 @@ export default function Navbar() {
     const isAdmin = session.user.role === 'ADMIN';
 
     const menuItems = isAdmin ? [
+        { href: '/teacher/player', label: 'Speler' },
         { href: '/admin/classes', label: 'Klassen' },
         { href: '/admin/teachers', label: 'Leerkrachten' },
         { href: '/admin/themes', label: "Thema's" },

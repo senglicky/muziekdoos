@@ -59,8 +59,7 @@ model Song {
   themeId     String
   theme       Theme    @relation(fields: [themeId], references: [id])
   
-  classId     String
-  class       Class    @relation(fields: [classId], references: [id])
+  classes     Class[]
   
   uploadedById String
   uploadedBy   User     @relation(fields: [uploadedById], references: [id])

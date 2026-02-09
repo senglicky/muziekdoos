@@ -11,9 +11,9 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { title, url, themeId, classId, coverUrl } = body;
+    const { title, url, themeId, classIds, coverUrl } = body;
 
-    if (!title || !url || !themeId || !classId) {
+    if (!title || !url || !themeId || !classIds || !Array.isArray(classIds) || classIds.length === 0) {
         return new NextResponse("Missing required fields", { status: 400 });
     }
 
@@ -24,7 +24,9 @@ export async function POST(req: Request) {
                 url,
                 coverUrl,
                 themeId,
-                classId,
+                classes: {
+                    connect: classIds.map((id: string) => ({ id }))
+                },
                 uploadedById: session.user.id,
             },
         });
@@ -42,10 +44,6 @@ export async function GET(req: Request) {
         return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    // Teachers see their own songs, or all if needed? 
-    // Requirement doesn't specify strictly visibility, but usually dashboard shows own uploads.
-    // Let's return songs uploaded by this user.
-
     const { searchParams } = new URL(req.url);
     const myUploadsOnly = searchParams.get('myUploads') === 'true';
 
@@ -53,16 +51,20 @@ export async function GET(req: Request) {
         ? { uploadedById: session.user.id }
         : {};
 
-    const songs = await prisma.song.findMany({
-        where: whereClause,
-        orderBy: { createdAt: 'desc' },
-        include: {
-            theme: true,
-            class: true
-        }
-    });
-
-    return NextResponse.json(songs);
+    try {
+        const songs = await prisma.song.findMany({
+            where: whereClause,
+            orderBy: { createdAt: 'desc' },
+            include: {
+                theme: true,
+                classes: true
+            }
+        });
+        return NextResponse.json(songs);
+    } catch (error) {
+        console.error(error);
+        return new NextResponse("Error fetching songs", { status: 500 });
+    }
 }
 
 export async function DELETE(req: Request) {
@@ -88,7 +90,6 @@ export async function DELETE(req: Request) {
             return new NextResponse("Song not found", { status: 404 });
         }
 
-        // Only allow owner or admin to delete
         if (song.uploadedById !== session.user.id && session.user.role !== "ADMIN") {
             return new NextResponse("Forbidden", { status: 403 });
         }
@@ -97,15 +98,13 @@ export async function DELETE(req: Request) {
             where: { id },
         });
 
-        // Note: Supabase storage file cleanup could be added here if needed,
-        // but for now we focus on database record removal.
-
         return new NextResponse("Song deleted");
     } catch (error) {
         console.error(error);
         return new NextResponse("Error deleting song", { status: 500 });
     }
 }
+
 export async function PATCH(req: Request) {
     const session = await getServerSession(authOptions);
 
@@ -114,7 +113,7 @@ export async function PATCH(req: Request) {
     }
 
     const body = await req.json();
-    const { id, title, themeId, classId } = body;
+    const { id, title, themeId, classIds } = body;
 
     if (!id) {
         return new NextResponse("Missing id", { status: 400 });
@@ -126,7 +125,9 @@ export async function PATCH(req: Request) {
             data: {
                 title: title ?? undefined,
                 themeId: themeId ?? undefined,
-                classId: classId ?? undefined,
+                classes: classIds ? {
+                    set: classIds.map((cid: string) => ({ id: cid }))
+                } : undefined,
             },
         });
         return NextResponse.json(updatedSong);
